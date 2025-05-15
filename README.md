@@ -4,6 +4,29 @@ A React-based chatbot application with an animated talking head that can be conn
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FFraterCCCLXIII%2Fhead&project-name=animated-head-chatbot&repository-name=animated-head-chatbot)
 
+## Current Status (May 15, 2025)
+
+The project is currently being updated to fix Vercel deployment issues. The following changes have been made:
+
+1. Added a static HTML fallback page for Vercel deployment
+2. Updated Next.js configuration to use static export
+3. Simplified Vercel configuration
+4. Modified package.json scripts for better compatibility
+
+### Known Issues
+
+The Next.js build is encountering errors related to undefined properties:
+- "Cannot read properties of undefined (reading 'S')"
+- "Cannot read properties of undefined (reading 'clientModules')"
+
+These issues are likely related to compatibility problems between React 19 and Next.js, or with the Three.js integration.
+
+### Next Steps
+
+1. Investigate and fix the underlying build issues
+2. Re-enable the full Next.js application once the build issues are resolved
+3. Update the components to ensure compatibility with the latest versions of React and Next.js
+
 ## Features
 
 - Chat interface with message history
