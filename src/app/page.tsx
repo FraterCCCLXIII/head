@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import ChatWithHead from '@/components/ChatWithHead';
+import Layout from '@/components/Layout';
 
 export default function Home() {
   const [headType, setHeadType] = useState<'svg' | '3d'>('svg');
   const [showApiConfig, setShowApiConfig] = useState(false);
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-0 relative">
+    <Layout>
       {/* API Settings Button - Top Right */}
       <div className="absolute top-4 right-4 z-10">
         <button
@@ -51,7 +52,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Head Type Selector - Below Head */}
+      {/* Head Type Selector - Top Left */}
       <div className="absolute top-4 left-4 z-10">
         <div className="flex gap-2">
           <button
@@ -81,6 +82,6 @@ export default function Home() {
       <div className="w-full h-full flex flex-col">
         <ChatWithHead headType={headType} className="flex-grow" />
       </div>
-    </main>
+    </Layout>
   );
 }
