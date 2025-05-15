@@ -143,12 +143,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
-      <header className="w-full max-w-4xl py-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Animated Head Chatbot</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Chat with an AI assistant with an animated talking head</p>
-      </header>
       
       <main className="flex flex-col w-full max-w-4xl flex-grow items-center justify-center gap-8 py-8">
+        <div className="absolute top-4 left-4">
+          <a 
+            href="/gamebuddy" 
+            className="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-md transition-colors"
+          >
+            Try Game Buddy Head
+          </a>
+        </div>
+        
         {showConfig ? (
           <div className="w-full max-w-md">
             <LLMConfigComponent 
@@ -164,26 +169,26 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col md:flex-row w-full items-center justify-center gap-8">
-              <div className="w-full md:w-1/3 flex justify-center">
+            <div className="flex flex-col w-full items-center justify-between h-screen">
+              <div className="w-full flex justify-center pt-10">
                 <div className="w-64 h-64">
-                  <SVGHead 
-                    expression={expression} 
-                    speaking={speaking} 
+                  <SVGHead
+                    expression={expression}
+                    speaking={speaking}
                     containerStyle={{ width: '100%', height: '100%' }}
                   />
                 </div>
               </div>
-              
-              <div className="w-full md:w-2/3">
-                <Chat 
+
+              <div className="w-full flex-grow flex items-end justify-center pb-4">
+                <Chat
                   onSendMessage={handleSendMessage}
-                  className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg shadow-md"
+                  className="w-full max-w-2xl border border-gray-200 dark:border-gray-700 rounded-lg shadow-md"
                 />
               </div>
             </div>
             
-            <div className="w-full flex justify-center mt-6">
+            <div className="absolute top-4 right-4">
               <button
                 onClick={() => setShowConfig(true)}
                 className="py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors flex items-center"
@@ -195,14 +200,7 @@ export default function Home() {
         )}
       </main>
       
-      <footer className="w-full max-w-4xl py-6 text-center text-gray-600 dark:text-gray-400">
-        <p>Connect this chatbot to your favorite LLM API</p>
-        <div className="mt-2 flex justify-center space-x-4">
-          <a href="https://openai.com/api/" target="_blank" rel="noopener noreferrer" className="hover:underline">OpenAI</a>
-          <a href="https://azure.microsoft.com/en-us/products/ai-services/openai-service" target="_blank" rel="noopener noreferrer" className="hover:underline">Azure OpenAI</a>
-          <a href="https://www.anthropic.com/api" target="_blank" rel="noopener noreferrer" className="hover:underline">Anthropic Claude</a>
-        </div>
-      </footer>
+
     </div>
   );
 }

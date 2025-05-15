@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Chat from '../Chat';
 import SVGHead from '../SVGHead';
 import ThreeJSHead from '../ThreeJSHead';
+import GameBuddyHead from '../GameBuddyHead';
 import './styles.css';
 
 interface ChatWithHeadProps {
-  headType?: 'svg' | '3d';
+  headType?: 'svg' | '3d' | 'gamebuddy';
   className?: string;
   apiEndpoint?: string;
 }
@@ -16,7 +17,7 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
   apiEndpoint = '/api/chat'
 }) => {
   const [speaking, setSpeaking] = useState(false);
-  const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised'>('neutral');
+  const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry'>('neutral');
   const [headHeight, setHeadHeight] = useState(40); // 40% of viewport height
   const resizerRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,8 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
       return 'thinking';
     } else if (lowerMessage.includes('wow') || lowerMessage.includes('amazing') || lowerMessage.includes('incredible')) {
       return 'surprised';
+    } else if (lowerMessage.includes('angry') || lowerMessage.includes('upset') || lowerMessage.includes('mad')) {
+      return 'angry';
     }
     
     return 'neutral';
@@ -128,6 +131,53 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
     }
   };
 
+  // Track the current message for GameBuddyHead
+  const [currentMessage, setCurrentMessage] = useState('');
+
+  // Modified sendMessage to track the current message and dispatch custom event
+  const sendMessageWithTracking = async (message: string): Promise<string> => {
+    try {
+      // Set thinking expression while waiting for response
+      setExpression('thinking');
+      
+      const response = await sendMessage(message);
+      
+      // Set the current message for GameBuddyHead
+      setCurrentMessage(response);
+      
+      // Set expression based on message content
+      const newExpression = analyzeMessage(response);
+      setExpression(newExpression as any);
+      
+      // Dispatch custom event for GameBuddyHead to react to
+      const chatResponseEvent = new CustomEvent('chatResponse', {
+        detail: {
+          message: response,
+          expression: newExpression
+        }
+      });
+      window.dispatchEvent(chatResponseEvent);
+      
+      // Animate speaking
+      setSpeaking(true);
+      
+      // Stop speaking after a delay proportional to message length
+      // For GameBuddyHead, this is less important as it has its own timing
+      const speakingDuration = Math.min(Math.max(response.length * 80, 2000), 10000);
+      setTimeout(() => {
+        setSpeaking(false);
+      }, speakingDuration);
+      
+      return response;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setExpression('sad');
+      const errorMessage = 'Sorry, there was an error processing your request.';
+      setCurrentMessage(errorMessage);
+      return errorMessage;
+    }
+  };
+
   return (
     <div className={`chat-with-head ${className}`}>
       <div className="head-container" style={{ height: `${headHeight}vh` }}>
@@ -137,11 +187,18 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
             speaking={speaking} 
             containerStyle={{ width: '250px', height: '250px', margin: '0 auto' }}
           />
-        ) : (
+        ) : headType === '3d' ? (
           <ThreeJSHead 
             expression={expression} 
             speaking={speaking} 
             containerStyle={{ width: '350px', height: '350px', margin: '0 auto' }}
+          />
+        ) : (
+          <GameBuddyHead
+            expression={expression}
+            speaking={speaking}
+            message={currentMessage}
+            containerStyle={{ width: '280px', height: '280px', margin: '0 auto' }}
           />
         )}
       </div>
@@ -150,7 +207,7 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
       <div className="resizer" ref={resizerRef}></div>
       
       <div className="chat-interface" style={{ height: `${100 - headHeight - 1}vh` }}>
-        <Chat onSendMessage={sendMessage} />
+        <Chat onSendMessage={sendMessageWithTracking} />
       </div>
     </div>
   );
