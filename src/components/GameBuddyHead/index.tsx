@@ -448,7 +448,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
     
     // Start the phoneme processing
     processNextPhoneme();
-  };
+  }, [applyMouthShape, currentExpression]);
 
   // Create a ref outside the effect to track the last message
   const lastMessageRef = useRef('');
