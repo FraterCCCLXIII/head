@@ -5,52 +5,81 @@ import ChatWithHead from '@/components/ChatWithHead';
 
 export default function Home() {
   const [headType, setHeadType] = useState<'svg' | '3d'>('svg');
+  const [showApiConfig, setShowApiConfig] = useState(false);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8">
-      <div className="w-full max-w-5xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Animated Head Chatbot
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Chat with an AI assistant with an animated talking head
-          </p>
-          
-          <div className="flex justify-center gap-4 mb-6">
-            <button
-              onClick={() => setHeadType('svg')}
-              className={`px-4 py-2 rounded-md ${
-                headType === 'svg'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-800'
-              }`}
-            >
-              2D SVG Head
-            </button>
-            <button
-              onClick={() => setHeadType('3d')}
-              className={`px-4 py-2 rounded-md ${
-                headType === '3d'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-800'
-              }`}
-            >
-              3D ThreeJS Head
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <ChatWithHead headType={headType} />
-        </div>
+    <main className="flex min-h-screen flex-col items-center p-0 relative">
+      {/* API Settings Button - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={() => setShowApiConfig(!showApiConfig)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Configure LLM API
+        </button>
         
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>
-            This is a demo of a chatbot with an animated talking head.
-            Try sending a message to see the head animate!
-          </p>
+        {showApiConfig && (
+          <div className="absolute right-0 mt-2 p-4 bg-white rounded-md shadow-lg w-80">
+            <h3 className="text-lg font-medium mb-2">API Configuration</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                API Provider
+              </label>
+              <select className="w-full p-2 border rounded-md">
+                <option value="openai">OpenAI</option>
+                <option value="azure">Azure OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="local">Local Model</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                API Key
+              </label>
+              <input 
+                type="password" 
+                className="w-full p-2 border rounded-md"
+                placeholder="Enter your API key"
+              />
+            </div>
+            <div className="flex justify-end">
+              <button className="px-3 py-1 bg-blue-600 text-white rounded-md">
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Head Type Selector - Below Head */}
+      <div className="absolute top-4 left-4 z-10">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setHeadType('svg')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              headType === 'svg'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            2D SVG
+          </button>
+          <button
+            onClick={() => setHeadType('3d')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              headType === '3d'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            3D Model
+          </button>
         </div>
+      </div>
+
+      {/* Main Content Area - Full Height */}
+      <div className="w-full h-full flex flex-col">
+        <ChatWithHead headType={headType} className="flex-grow" />
       </div>
     </main>
   );

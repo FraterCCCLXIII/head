@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Chat from '../Chat';
 import SVGHead from '../SVGHead';
 import ThreeJSHead from '../ThreeJSHead';
@@ -17,6 +17,8 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
 }) => {
   const [speaking, setSpeaking] = useState(false);
   const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised'>('neutral');
+  const [headHeight, setHeadHeight] = useState(40); // 40% of viewport height
+  const resizerRef = useRef<HTMLDivElement>(null);
 
   // Function to analyze message sentiment and set appropriate expression
   const analyzeMessage = (message: string) => {
@@ -62,6 +64,45 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
     };
   }, []);
 
+  // Setup resizer functionality
+  useEffect(() => {
+    const resizer = resizerRef.current;
+    if (!resizer) return;
+
+    let startY = 0;
+    let startHeight = 0;
+
+    const onMouseDown = (e: MouseEvent) => {
+      startY = e.clientY;
+      startHeight = headHeight;
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const delta = e.clientY - startY;
+      const newHeight = Math.max(20, Math.min(70, startHeight + (delta / window.innerHeight) * 100));
+      setHeadHeight(newHeight);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    resizer.addEventListener('mousedown', onMouseDown);
+
+    return () => {
+      resizer.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [headHeight]);
+
   // Function to send message to API
   const sendMessage = async (message: string): Promise<string> => {
     try {
@@ -89,23 +130,26 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
 
   return (
     <div className={`chat-with-head ${className}`}>
-      <div className="head-container">
+      <div className="head-container" style={{ height: `${headHeight}vh` }}>
         {headType === 'svg' ? (
           <SVGHead 
             expression={expression} 
             speaking={speaking} 
-            containerStyle={{ width: '200px', height: '200px', margin: '0 auto' }}
+            containerStyle={{ width: '250px', height: '250px', margin: '0 auto' }}
           />
         ) : (
           <ThreeJSHead 
             expression={expression} 
             speaking={speaking} 
-            containerStyle={{ width: '300px', height: '300px', margin: '0 auto' }}
+            containerStyle={{ width: '350px', height: '350px', margin: '0 auto' }}
           />
         )}
       </div>
       
-      <div className="chat-interface">
+      {/* Resizer handle */}
+      <div className="resizer" ref={resizerRef}></div>
+      
+      <div className="chat-interface" style={{ height: `${100 - headHeight - 1}vh` }}>
         <Chat onSendMessage={sendMessage} />
       </div>
     </div>
