@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useScroll, useTransform } from 'framer-motion';
 import './styles.css';
 
 interface Message {
@@ -22,6 +24,12 @@ const Chat: React.FC<ChatProps> = ({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  
+  // For the 3D scroll effect
+  const { scrollY } = useScroll({
+    container: messagesContainerRef
+  });
   
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -87,25 +95,79 @@ const Chat: React.FC<ChatProps> = ({
     }
   };
 
+  // Function to create message variants based on scroll position
+  const createMessageVariants = (index: number) => {
+    // Calculate the position where this message should start fading
+    const startFadePosition = index * 100; // Adjust this value as needed
+    
+    // Create transform values based on scroll position
+    const opacity = useTransform(
+      scrollY, 
+      [startFadePosition, startFadePosition + 150], 
+      [1, 0]
+    );
+    
+    const scale = useTransform(
+      scrollY, 
+      [startFadePosition, startFadePosition + 150], 
+      [1, 0.9]
+    );
+    
+    const rotateX = useTransform(
+      scrollY, 
+      [startFadePosition, startFadePosition + 150], 
+      [0, 15]
+    );
+    
+    const translateZ = useTransform(
+      scrollY, 
+      [startFadePosition, startFadePosition + 150], 
+      [0, -30]
+    );
+    
+    return { opacity, scale, rotateX, translateZ };
+  };
+
   return (
     <div className={`chat-container ${className}`}>
-      <div className="messages-container">
-        {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
-          >
-            <div className="message-content">{message.content}</div>
-          </div>
-        ))}
+      <div 
+        ref={messagesContainerRef}
+        className="messages-container"
+        style={{ perspective: '1000px' }}
+      >
+        {messages.map((message, index) => {
+          const { opacity, scale, rotateX, translateZ } = createMessageVariants(index);
+          
+          return (
+            <motion.div 
+              key={message.id} 
+              className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
+              style={{ 
+                opacity,
+                scale,
+                rotateX,
+                translateZ,
+                transformOrigin: message.role === 'user' ? 'bottom right' : 'bottom left',
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div className="message-content">{message.content}</div>
+            </motion.div>
+          );
+        })}
         {isLoading && (
-          <div className="message assistant-message">
+          <motion.div 
+            className="message assistant-message"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <div className="message-content typing-indicator">
               <span></span>
               <span></span>
               <span></span>
             </div>
-          </div>
+          </motion.div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -119,13 +181,15 @@ const Chat: React.FC<ChatProps> = ({
           disabled={isLoading}
           className="message-input"
         />
-        <button 
+        <motion.button 
           type="submit" 
           disabled={isLoading || !input.trim()} 
           className="send-button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           Send
-        </button>
+        </motion.button>
       </form>
     </div>
   );

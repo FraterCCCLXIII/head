@@ -3,38 +3,56 @@
 import { useState, useEffect } from "react";
 import Chat from "@/src/components/Chat";
 import SVGHead from "@/src/components/SVGHead";
-import LLMConfigComponent from "@/src/components/LLMConfig";
+import ThreeJSHead from "@/src/components/ThreeJSHead";
+import GameBuddyHead from "@/src/components/GameBuddyHead";
+import HeadSelector from "@/src/components/HeadSelector";
+import ApiSettings from "@/src/components/ApiSettings";
+import ResizableGrip from "@/src/components/ResizableGrip";
 import { LLMConfig, sendMessageToLLM } from "@/src/utils/llmClient";
 
 export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised'>('neutral');
-  const [showConfig, setShowConfig] = useState(false);
-  const [llmConfig, setLLMConfig] = useState<LLMConfig | null>(null);
+  const [headType, setHeadType] = useState<'svg' | '3d' | 'gamebuddy'>('gamebuddy');
+  const [apiKey, setApiKey] = useState<string>('');
+  const [apiEndpoint, setApiEndpoint] = useState<string>('https://api.openai.com/v1/chat/completions');
   const [conversationHistory, setConversationHistory] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [isConfigured, setIsConfigured] = useState(false);
-
-  // Function to handle LLM configuration
-  const handleSaveConfig = (config: LLMConfig) => {
-    setLLMConfig(config);
-    setIsConfigured(true);
-    setShowConfig(false);
-    
-    // Save to localStorage for persistence
-    localStorage.setItem('llmConfig', JSON.stringify(config));
-  };
+  const [headHeight, setHeadHeight] = useState<number>(300);
+  const [chatHeight, setChatHeight] = useState<number>(300);
 
   // Load config from localStorage on initial render
   useEffect(() => {
-    const savedConfig = localStorage.getItem('llmConfig');
-    if (savedConfig) {
-      try {
-        const config = JSON.parse(savedConfig) as LLMConfig;
-        setLLMConfig(config);
-        setIsConfigured(true);
-      } catch (error) {
-        console.error('Error parsing saved LLM config:', error);
-      }
+    // Load API settings
+    const savedApiKey = localStorage.getItem('apiKey');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+    
+    const savedApiEndpoint = localStorage.getItem('apiEndpoint');
+    if (savedApiEndpoint) {
+      setApiEndpoint(savedApiEndpoint);
+    }
+    
+    if (savedApiKey && savedApiEndpoint) {
+      setIsConfigured(true);
+    }
+    
+    // Load head type preference
+    const savedHeadType = localStorage.getItem('headType') as 'svg' | '3d' | 'gamebuddy' | null;
+    if (savedHeadType) {
+      setHeadType(savedHeadType);
+    }
+    
+    // Load saved heights
+    const savedHeadHeight = localStorage.getItem('headHeight');
+    if (savedHeadHeight) {
+      setHeadHeight(parseInt(savedHeadHeight, 10));
+    }
+    
+    const savedChatHeight = localStorage.getItem('chatHeight');
+    if (savedChatHeight) {
+      setChatHeight(parseInt(savedChatHeight, 10));
     }
   }, []);
 
@@ -77,8 +95,16 @@ export default function Home() {
       let response = '';
       
       // If LLM is configured, use it
-      if (isConfigured && llmConfig) {
-        response = await sendMessageToLLM(message, llmConfig, conversationHistory);
+      if (isConfigured && apiKey) {
+        const config: LLMConfig = {
+          apiKey: apiKey,
+          endpoint: apiEndpoint,
+          model: 'gpt-3.5-turbo', // Default model
+          temperature: 0.7,
+          maxTokens: 1000
+        };
+        
+        response = await sendMessageToLLM(message, config, conversationHistory);
       } else {
         // Use mock responses if not configured
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -119,6 +145,36 @@ export default function Home() {
     }
   };
 
+  // Handle API key change
+  const handleApiKeyChange = (newApiKey: string) => {
+    setApiKey(newApiKey);
+    localStorage.setItem('apiKey', newApiKey);
+    setIsConfigured(!!newApiKey && !!apiEndpoint);
+  };
+
+  // Handle API endpoint change
+  const handleApiEndpointChange = (newEndpoint: string) => {
+    setApiEndpoint(newEndpoint);
+    localStorage.setItem('apiEndpoint', newEndpoint);
+    setIsConfigured(!!apiKey && !!newEndpoint);
+  };
+
+  // Handle head type change
+  const handleHeadTypeChange = (newHeadType: 'svg' | '3d' | 'gamebuddy') => {
+    setHeadType(newHeadType);
+    localStorage.setItem('headType', newHeadType);
+  };
+  
+  // Handle resizing between head and chat areas
+  const handleResize = (newHeadHeight: number, newChatHeight: number) => {
+    setHeadHeight(newHeadHeight);
+    setChatHeight(newChatHeight);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('headHeight', newHeadHeight.toString());
+    localStorage.setItem('chatHeight', newChatHeight.toString());
+  };
+
   // Listen for chat response events
   useEffect(() => {
     const handleChatResponse = (event: CustomEvent<{ message: string }>) => {
@@ -134,73 +190,85 @@ export default function Home() {
       }, message.length * 50); // Rough estimate of speaking time
     };
 
-    window.addEventListener('chatResponse' as any, handleChatResponse);
+    window.addEventListener('chatResponse', handleChatResponse as EventListener);
     
     return () => {
-      window.removeEventListener('chatResponse' as any, handleChatResponse);
+      window.removeEventListener('chatResponse', handleChatResponse as EventListener);
     };
   }, []);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
-      
-      <main className="flex flex-col w-full max-w-4xl flex-grow items-center justify-center gap-8 py-8">
-        <div className="absolute top-4 left-4">
-          <a 
-            href="/gamebuddy" 
-            className="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-md transition-colors"
-          >
-            Try Game Buddy Head
-          </a>
+    <div className="flex flex-col items-center min-h-screen bg-neutral-50">
+      <main className="flex flex-col w-full max-w-4xl flex-grow items-center h-screen">
+        {/* Top navigation bar */}
+        <div className="w-full flex justify-between items-center p-4">
+          <div className="flex items-center space-x-2">
+            <HeadSelector 
+              onSelectHead={handleHeadTypeChange} 
+              currentHead={headType} 
+            />
+          </div>
+          
+          <div className="flex items-center">
+            <ApiSettings 
+              apiKey={apiKey}
+              onApiKeyChange={handleApiKeyChange}
+              apiEndpoint={apiEndpoint}
+              onApiEndpointChange={handleApiEndpointChange}
+            />
+          </div>
         </div>
         
-        {showConfig ? (
-          <div className="w-full max-w-md">
-            <LLMConfigComponent 
-              onSave={handleSaveConfig} 
-              initialConfig={llmConfig || undefined}
-            />
-            <button
-              onClick={() => setShowConfig(false)}
-              className="mt-4 w-full py-2 px-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-md transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col w-full items-center justify-between h-screen">
-              <div className="w-full flex justify-center pt-10">
-                <div className="w-64 h-64">
-                  <SVGHead
-                    expression={expression}
-                    speaking={speaking}
-                    containerStyle={{ width: '100%', height: '100%' }}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full flex-grow flex items-end justify-center pb-4">
-                <Chat
-                  onSendMessage={handleSendMessage}
-                  className="w-full max-w-2xl border border-gray-200 dark:border-gray-700 rounded-lg shadow-md"
-                />
-              </div>
-            </div>
+        {/* Head container */}
+        <div 
+          className="w-full flex flex-col items-center justify-center overflow-hidden"
+          style={{ height: `${headHeight}px` }}
+        >
+          <div className="w-64 h-64">
+            {headType === 'svg' && (
+              <SVGHead
+                expression={expression}
+                speaking={speaking}
+                containerStyle={{ width: '100%', height: '100%' }}
+              />
+            )}
             
-            <div className="absolute top-4 right-4">
-              <button
-                onClick={() => setShowConfig(true)}
-                className="py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors flex items-center"
-              >
-                {isConfigured ? 'Change LLM Configuration' : 'Configure LLM API'}
-              </button>
-            </div>
-          </>
-        )}
+            {headType === '3d' && (
+              <ThreeJSHead
+                expression={expression}
+                speaking={speaking}
+              />
+            )}
+            
+            {headType === 'gamebuddy' && (
+              <GameBuddyHead
+                expression={expression}
+                speaking={speaking}
+                text={conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : ''}
+              />
+            )}
+          </div>
+        </div>
+        
+        {/* Resizable grip */}
+        <ResizableGrip 
+          onResize={handleResize}
+          containerHeight={headHeight + chatHeight}
+          minHeadHeight={150}
+          minChatHeight={150}
+        />
+        
+        {/* Chat container */}
+        <div 
+          className="w-full px-4 pb-4 flex-grow"
+          style={{ height: `${chatHeight}px` }}
+        >
+          <Chat
+            onSendMessage={handleSendMessage}
+            className="w-full h-full rounded-lg"
+          />
+        </div>
       </main>
-      
-
     </div>
   );
 }
