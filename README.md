@@ -4,26 +4,36 @@ A React-based chatbot application with an animated talking head that can be conn
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FFraterCCCLXIII%2Fhead&project-name=animated-head-chatbot&repository-name=animated-head-chatbot)
 
-## Vercel Deployment Fixes
+## Vercel Deployment Status
 
-The following fixes were implemented to resolve Vercel deployment issues:
+The project is currently experiencing build issues with Next.js when deploying to Vercel. We've implemented a static fallback page as a temporary solution while we work on fixing the underlying issues.
+
+### Implemented Fixes
 
 1. **Fixed TypeScript Errors**:
    - Added proper type assertions in app/page.tsx for conversation history roles
    - Fixed import paths in src/app/page.tsx to use relative paths instead of alias paths
+   - Added dependency array to useCallback in GameBuddyHead component
 
 2. **ESLint Configuration**:
    - Added `eslint: { ignoreDuringBuilds: true }` to next.config.mjs to prevent ESLint errors from blocking builds
+   - Created custom .eslintrc.js to disable problematic rules
 
 3. **Vercel Configuration**:
-   - Added vercel.json with explicit build configuration
-   - Added .vercelignore to exclude unnecessary files from deployment
+   - Updated vercel.json to use static deployment with public directory
+   - Added static fallback page for Vercel deployment
 
-4. **App Directory Structure**:
-   - Fixed issues with duplicate app directories (app/ and src/app/)
-   - Ensured proper import paths between components
+4. **Next.js Configuration**:
+   - Downgraded Next.js from 15.3.2 to 14.1.0 to resolve compatibility issues
+   - Simplified next.config.js to remove problematic configuration options
 
-These changes ensure the application builds successfully on Vercel without TypeScript or ESLint errors.
+### Known Issues
+
+1. Next.js static generation errors:
+   - Error: `Cannot read properties of undefined (reading 'S')` during static page generation
+   - Error: `Cannot read properties of undefined (reading 'clientModules')` during prerendering
+
+These issues are being investigated. In the meantime, a static fallback page is being served.
 
 ## Features
 
