@@ -6,8 +6,8 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
     "dev:custom": "next dev -p 12000 -H 0.0.0.0",
-    "build": "echo 'Build skipped - using custom server' && mkdir -p .next && touch .next/index.html",
-    "start": "node server.js",
+    "build": "next build",
+    "start": "npx serve out",
     "lint": "next lint",
     "custom-server": "node server.js"
   },
