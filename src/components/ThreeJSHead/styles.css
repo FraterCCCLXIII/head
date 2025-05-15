@@ -1,0 +1,13 @@
+.threejs-head-container {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+/* Make sure the canvas fills the container */
+.threejs-head-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
