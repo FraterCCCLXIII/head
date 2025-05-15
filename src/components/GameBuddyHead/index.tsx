@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import styles from './styles.module.css';
 
 interface GameBuddyHeadProps {
@@ -282,7 +282,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
   };
 
   // Apply mouth shape based on phoneme or expression
-  const applyMouthShape = (shape: MouthShape) => {
+  const applyMouthShape = useCallback((shape: MouthShape) => {
     if (!mouthRef.current || !tongueRef.current || !teethTopRef.current || !teethBottomRef.current) return;
     
     // Apply mouth shape
@@ -300,15 +300,14 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
     teethBottomRef.current.style.setProperty('--teeth-bottom-y', shape.teethBottomY + 'px');
     teethTopRef.current.style.setProperty('--teeth-width', shape.teethWidth);
     teethBottomRef.current.style.setProperty('--teeth-width', shape.teethWidth);
-  };
+  }, []);
 
-  // Set expression
-  const setExpressionState = (expressionName: 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry') => {
-    setCurrentExpression(expressionName);
+  // Update expression based on current state
+  useEffect(() => {
     if (!isTalking) {
-      applyMouthShape(expressions[expressionName] || expressions.neutral);
+      applyMouthShape(expressions[currentExpression] || expressions.neutral);
     }
-  };
+  }, [currentExpression, isTalking]);
 
   // Speak a single phoneme
   const speakPhoneme = (phoneme: string) => {
@@ -369,7 +368,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
   };
   
   // Speak a phrase with phonemes
-  const speakPhrase = (text: string, expressionName: string = 'neutral') => {
+  const speakPhrase = useCallback((text: string, expressionName: string = 'neutral') => {
     // Clear any existing timeouts and intervals
     clearAllTimeouts();
     if (phonemeIntervalRef.current) {
@@ -481,7 +480,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
         phonemeIntervalRef.current = null;
       }
     };
-  }, [speaking, message, expression, speakPhrase]);
+  }, [speaking, message, expression, applyMouthShape]);
   
   // Effect to handle message changes even when speaking is not explicitly set
   useEffect(() => {
@@ -490,7 +489,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
       // If we have a new message, start speaking it
       speakPhrase(message, expression);
     }
-  }, [message, expression, speakPhrase]);
+  }, [message, expression]);
   
   // Cleanup on component unmount
   useEffect(() => {
