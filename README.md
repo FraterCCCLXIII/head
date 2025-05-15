@@ -2,12 +2,15 @@
 
 A React-based chatbot application with an animated talking head that can be connected to any LLM API.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FFraterCCCLXIII%2Fhead&project-name=animated-head-chatbot&repository-name=animated-head-chatbot)
+
 ## Features
 
 - Chat interface with message history
-- Two types of animated heads:
+- Three types of animated heads:
   - 2D SVG-based head with facial expressions
   - 3D head using Three.js
+  - GameBuddyHead with realistic phoneme-based mouth animations and dynamic expressions
 - Responsive design with Tailwind CSS
 - TypeScript for type safety
 - Next.js for server-side rendering and API routes
@@ -23,8 +26,8 @@ A React-based chatbot application with an animated talking head that can be conn
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/animated-head-chatbot.git
-cd animated-head-chatbot
+git clone https://github.com/FraterCCCLXIII/head.git
+cd head
 ```
 
 2. Install dependencies
@@ -95,6 +98,10 @@ The SVG head can be customized by modifying the `src/components/SVGHead/index.ts
 ### 3D Head
 
 The 3D head can be customized by modifying the `src/components/ThreeJSHead/index.tsx` file. You can replace the simple 3D model with a more complex one or add more animations.
+
+### GameBuddyHead
+
+The GameBuddyHead component provides realistic mouth animations based on phoneme mapping and dynamic expressions based on text content. You can customize it by modifying the `src/components/GameBuddyHead/index.tsx` file.
 
 ## License
 
