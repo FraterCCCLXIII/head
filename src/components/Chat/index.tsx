@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, MotionValue } from 'framer-motion';
 import { useScroll, useTransform } from 'framer-motion';
 import './styles.css';
 
@@ -26,10 +26,25 @@ const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
-  // For the 3D scroll effect
-  const { scrollY } = useScroll({
-    container: messagesContainerRef
-  });
+  // Update scroll position when messages container scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      if (messagesContainerRef.current) {
+        setScrollPosition(messagesContainerRef.current.scrollTop);
+      }
+    };
+    
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
   
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -95,38 +110,22 @@ const Chat: React.FC<ChatProps> = ({
     }
   };
 
-  // Function to create message variants based on scroll position
-  const createMessageVariants = (index: number) => {
-    // Calculate the position where this message should start fading
-    const startFadePosition = index * 100; // Adjust this value as needed
+  // Instead of creating transform functions inside the component,
+  // we'll use simple style calculations based on scroll position
+  const getMessageStyle = (index: number, scrollPosition: number) => {
+    const startFadePosition = index * 100;
+    const progress = Math.max(0, Math.min(1, (scrollPosition - startFadePosition) / 150));
     
-    // Create transform values based on scroll position
-    const opacity = useTransform(
-      scrollY, 
-      [startFadePosition, startFadePosition + 150], 
-      [1, 0]
-    );
-    
-    const scale = useTransform(
-      scrollY, 
-      [startFadePosition, startFadePosition + 150], 
-      [1, 0.9]
-    );
-    
-    const rotateX = useTransform(
-      scrollY, 
-      [startFadePosition, startFadePosition + 150], 
-      [0, 15]
-    );
-    
-    const translateZ = useTransform(
-      scrollY, 
-      [startFadePosition, startFadePosition + 150], 
-      [0, -30]
-    );
-    
-    return { opacity, scale, rotateX, translateZ };
+    return {
+      opacity: 1 - progress,
+      scale: 1 - (progress * 0.1),
+      rotateX: progress * 15,
+      translateZ: progress * -30
+    };
   };
+  
+  // State to track scroll position
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   return (
     <div className={`chat-container ${className}`}>
@@ -136,7 +135,7 @@ const Chat: React.FC<ChatProps> = ({
         style={{ perspective: '1000px' }}
       >
         {messages.map((message, index) => {
-          const { opacity, scale, rotateX, translateZ } = createMessageVariants(index);
+          const { opacity, scale, rotateX, translateZ } = getMessageStyle(index, scrollPosition);
           
           return (
             <motion.div 
@@ -145,8 +144,8 @@ const Chat: React.FC<ChatProps> = ({
               style={{ 
                 opacity,
                 scale,
-                rotateX,
-                translateZ,
+                rotateX: `${rotateX}deg`,
+                translateZ: `${translateZ}px`,
                 transformOrigin: message.role === 'user' ? 'bottom right' : 'bottom left',
                 transformStyle: 'preserve-3d'
               }}

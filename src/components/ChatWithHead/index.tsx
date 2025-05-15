@@ -8,13 +8,13 @@ import './styles.css';
 interface ChatWithHeadProps {
   headType?: 'svg' | '3d' | 'gamebuddy';
   className?: string;
-  apiEndpoint?: string;
+  apiUrl?: string;
 }
 
 const ChatWithHead: React.FC<ChatWithHeadProps> = ({
   headType = 'svg',
   className = '',
-  apiEndpoint = '/api/chat'
+  apiUrl = '/api/chat'
 }) => {
   const [speaking, setSpeaking] = useState(false);
   const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry'>('neutral');
@@ -60,10 +60,10 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
       }, speakingDuration);
     };
 
-    window.addEventListener('chatResponse' as any, handleChatResponse);
+    window.addEventListener('chatResponse' as unknown as string, handleChatResponse);
     
     return () => {
-      window.removeEventListener('chatResponse' as any, handleChatResponse);
+      window.removeEventListener('chatResponse' as unknown as string, handleChatResponse);
     };
   }, []);
 
@@ -147,7 +147,7 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
       
       // Set expression based on message content
       const newExpression = analyzeMessage(response);
-      setExpression(newExpression as any);
+      setExpression(newExpression as 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry');
       
       // Dispatch custom event for GameBuddyHead to react to
       const chatResponseEvent = new CustomEvent('chatResponse', {
