@@ -60,10 +60,10 @@ const ChatWithHead: React.FC<ChatWithHeadProps> = ({
       }, speakingDuration);
     };
 
-    window.addEventListener('chatResponse' as unknown as string, handleChatResponse);
+    window.addEventListener('chatResponse', handleChatResponse as EventListener);
     
     return () => {
-      window.removeEventListener('chatResponse' as unknown as string, handleChatResponse);
+      window.removeEventListener('chatResponse', handleChatResponse as EventListener);
     };
   }, []);
 

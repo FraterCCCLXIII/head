@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import ChatWithHead from '@/components/ChatWithHead';
-import Layout from '@/components/Layout';
+import ChatWithHead from '../components/ChatWithHead';
+import Layout from '../components/Layout';
 
 export default function Home() {
   const [headType, setHeadType] = useState<'svg' | '3d'>('svg');

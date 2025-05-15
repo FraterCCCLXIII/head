@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 interface SVGHeadProps {
-  expression?: 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised';
+  expression?: 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry';
   speaking?: boolean;
   containerStyle?: React.CSSProperties;
 }

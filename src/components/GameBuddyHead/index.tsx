@@ -169,7 +169,6 @@ function convertTextToPhonemes(text: string): string {
     'TOMORROW': 'T U M A R O',
     'YESTERDAY': 'Y E S T E R D E',
     'HERE': 'H E R',
-    'THERE': 'TH E R',
     'EVERYWHERE': 'E V R E W E R',
     'NOWHERE': 'N O W E R',
     'SOMEWHERE': 'S A M W E R',
@@ -262,7 +261,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
 }) => {
   // We don't need currentShape state since we're using expressions[currentExpression]
   const [isTalking, setIsTalking] = useState(false);
-  const [currentExpression, setCurrentExpression] = useState(expression);
+  const [currentExpression, setCurrentExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry'>(expression || 'neutral');
   const phonemeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mouthRef = useRef<HTMLDivElement>(null);
   const tongueRef = useRef<HTMLDivElement>(null);
@@ -271,11 +270,14 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
 
   // Define a type for mouth shapes
   type MouthShape = {
-    mouthHeight: string;
-    mouthWidth: string;
-    tongueHeight: string;
-    tongueWidth: string;
-    teethHeight: string;
+    width: number;
+    height: number;
+    borderRadius: string;
+    tongueWidth: number;
+    tongueHeight: number;
+    tongueBottom: number;
+    teethTopY: number;
+    teethBottomY: number;
     teethWidth: string;
   };
 
@@ -383,7 +385,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
     const finalExpression = expressionName === 'neutral' ? detectedEmotion : expressionName;
     
     // Set initial expression
-    setExpressionState(finalExpression);
+    setCurrentExpression(finalExpression as 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry');
     
     // Convert text to phonemes and split into array
     const phonemeList = convertTextToPhonemes(text).split(' ').filter(p => p.trim() !== '');
@@ -413,7 +415,7 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
       if (phonemeIndex >= phonemeList.length) {
         // End of speech
         setIsTalking(false);
-        setExpressionState(finalExpression);
+        setCurrentExpression(finalExpression as 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry');
         return;
       }
       
@@ -421,13 +423,13 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
       
       // Check for expression changes based on punctuation
       if (currentPhoneme === '?') {
-        setExpressionState('thinking');
+        setCurrentExpression('thinking');
       } else if (currentPhoneme === '!') {
-        setExpressionState('surprised');
+        setCurrentExpression('surprised');
       } else if (phonemeIndex > 0 && phonemeIndex < phonemeList.length - 1) {
         // Occasionally change expression during speech for more natural look
         if (phonemeIndex % 20 === 0) {
-          setExpressionState(finalExpression);
+          setCurrentExpression(finalExpression as 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry');
         }
       }
       
@@ -503,8 +505,8 @@ const GameBuddyHead: React.FC<GameBuddyHeadProps> = ({
 
   // Initialize
   useEffect(() => {
-    setExpressionState(expression);
-  }, [expression, setExpressionState]);
+    setCurrentExpression(expression || 'neutral');
+  }, [expression]);
 
   // Listen for chat response events
   useEffect(() => {

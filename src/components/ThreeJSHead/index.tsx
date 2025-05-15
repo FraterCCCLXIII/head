@@ -8,7 +8,7 @@ import './styles.css';
 // In a real implementation, you would use a proper 3D model and animations
 
 interface ThreeJSHeadProps {
-  expression?: 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised';
+  expression?: 'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry';
   speaking?: boolean;
   containerStyle?: React.CSSProperties;
 }

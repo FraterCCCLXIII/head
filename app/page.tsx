@@ -88,7 +88,7 @@ export default function Home() {
       // Add user message to conversation history
       const updatedHistory = [
         ...conversationHistory,
-        { role: 'user', content: message }
+        { role: 'user' as 'user', content: message }
       ];
       setConversationHistory(updatedHistory);
       
@@ -97,8 +97,8 @@ export default function Home() {
       // If LLM is configured, use it
       if (isConfigured && apiKey) {
         const config: LLMConfig = {
+          provider: 'openai',
           apiKey: apiKey,
-          endpoint: apiEndpoint,
           model: 'gpt-3.5-turbo', // Default model
           temperature: 0.7,
           maxTokens: 1000
@@ -128,7 +128,7 @@ export default function Home() {
       // Add assistant response to conversation history
       setConversationHistory([
         ...updatedHistory,
-        { role: 'assistant', content: response }
+        { role: 'assistant' as 'assistant', content: response }
       ]);
       
       // Simulate speaking for the duration of the response
@@ -244,7 +244,7 @@ export default function Home() {
               <GameBuddyHead
                 expression={expression}
                 speaking={speaking}
-                text={conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : ''}
+                message={conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].content : ''}
               />
             )}
           </div>
