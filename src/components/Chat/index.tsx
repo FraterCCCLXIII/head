@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, MotionValue } from 'framer-motion';
-import { useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import './styles.css';
 
 interface Message {

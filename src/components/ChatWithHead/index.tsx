@@ -8,13 +8,11 @@ import './styles.css';
 interface ChatWithHeadProps {
   headType?: 'svg' | '3d' | 'gamebuddy';
   className?: string;
-  apiUrl?: string;
 }
 
 const ChatWithHead: React.FC<ChatWithHeadProps> = ({
   headType = 'svg',
-  className = '',
-  apiUrl = '/api/chat'
+  className = ''
 }) => {
   const [speaking, setSpeaking] = useState(false);
   const [expression, setExpression] = useState<'neutral' | 'happy' | 'sad' | 'thinking' | 'surprised' | 'angry'>('neutral');

@@ -88,7 +88,7 @@ export default function Home() {
       // Add user message to conversation history
       const updatedHistory = [
         ...conversationHistory,
-        { role: 'user' as 'user', content: message }
+        { role: 'user', content: message }
       ];
       setConversationHistory(updatedHistory);
       
@@ -128,7 +128,7 @@ export default function Home() {
       // Add assistant response to conversation history
       setConversationHistory([
         ...updatedHistory,
-        { role: 'assistant' as 'assistant', content: response }
+        { role: 'assistant', content: response }
       ]);
       
       // Simulate speaking for the duration of the response
